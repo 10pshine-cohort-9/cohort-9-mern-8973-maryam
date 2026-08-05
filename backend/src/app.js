@@ -15,8 +15,16 @@ app.use(cors());
 app.use(express.json());
 app.use(pinoHttp({ logger }));
 
-// Routes
+//Routes
 app.use("/api/health", healthRoutes);
+
+// Handle unknown routes (404)
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: "Route not found",
+  });
+});
 
 // Global Error Handler
 app.use(errorHandler);

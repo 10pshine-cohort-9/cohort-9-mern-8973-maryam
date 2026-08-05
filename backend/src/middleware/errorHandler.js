@@ -1,12 +1,13 @@
-const logger = require("../config/logger");
+module.exports = (err, req, res, next) => {
+  req.log.error(err);
 
-const errorHandler = (err, req, res, next) => {
-  logger.error(err);
+  const statusCode = err.status || 500;
 
-  res.status(err.status || 500).json({
+  res.status(statusCode).json({
     success: false,
-    message: err.message || "Internal Server Error",
+    message:
+      statusCode >= 500
+        ? "Internal Server Error"
+        : err.message,
   });
 };
-
-module.exports = errorHandler;
