@@ -1,0 +1,19 @@
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+}
+
+.app h1 {
+  font-size: 3rem;
+  color: #333;
+}
+
+.app p {
+  font-size: 1.1rem;
+  color: #666;
+}
