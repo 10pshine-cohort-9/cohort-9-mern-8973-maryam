@@ -25,7 +25,7 @@ const signup = async (req, res, next) => {
 
     const token = generateToken(user._id);
 
-    logger.info(`New user registered: ${user.email}`);
+    logger.info(`New user registered: ${user._id}`);
 
     res.status(201).json({
       success: true,
@@ -39,9 +39,15 @@ const signup = async (req, res, next) => {
         token,
       },
     });
-  } catch (error) {
-    next(error); // hands off to your global errorHandler middleware
+   } catch (error) {
+  if (error.code === 11000) {
+    return res.status(409).json({
+      success: false,
+      message: "An account with this email already exists",
+    });
   }
+  next(error);
+}
 };
 
 const login = async (req, res, next) => {
@@ -73,7 +79,7 @@ const login = async (req, res, next) => {
 
     const token = generateToken(user._id);
 
-    logger.info(`User logged in: ${user.email}`);
+    logger.info(`User logged in: ${user._id}`);
 
     res.status(200).json({
       success: true,
