@@ -10,7 +10,7 @@ const protect = require("../middleware/auth.middleware");
 
 const router = express.Router();
 
-router.use(protect); // is line ke neeche jitne bhi routes hain, sab protected ho jayenge
+router.use(protect); // All routes below require authentication
 
 router.post("/", createNote);
 router.get("/", getNotes);

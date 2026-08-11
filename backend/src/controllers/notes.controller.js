@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const Note = require("../models/Note");
 
 const createNote = async (req, res, next) => {
@@ -34,6 +35,10 @@ const getNotes = async (req, res, next) => {
 
 const getNoteById = async (req, res, next) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: "Invalid note ID" });
+    }
+
     const note = await Note.findOne({ _id: req.params.id, user: req.user._id });
     if (!note) {
       return res.status(404).json({ success: false, message: "Note not found" });
@@ -43,9 +48,12 @@ const getNoteById = async (req, res, next) => {
     next(error);
   }
 };
-
 const updateNote = async (req, res, next) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: "Invalid note ID" });
+    }
+
     const { title, content } = req.body || {};
     const note = await Note.findOne({ _id: req.params.id, user: req.user._id });
 
@@ -69,6 +77,10 @@ const updateNote = async (req, res, next) => {
 
 const deleteNote = async (req, res, next) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: "Invalid note ID" });
+    }
+
     const note = await Note.findOneAndDelete({ _id: req.params.id, user: req.user._id });
     if (!note) {
       return res.status(404).json({ success: false, message: "Note not found" });
