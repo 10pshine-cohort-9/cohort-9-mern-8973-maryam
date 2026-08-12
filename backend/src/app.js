@@ -8,6 +8,7 @@ const logger = require("./config/logger");
 const healthRoutes = require("./routes/health.routes");
 const errorHandler = require("./middleware/errorHandler");
 const authRoutes = require("./routes/auth.routes");
+const notesRoutes = require("./routes/notes.routes");
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use(pinoHttp({ logger }));
 //Routes
 app.use("/api/health", healthRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/notes", notesRoutes);
 
 // Handle unknown routes (404)
 app.use((req, res) => {
