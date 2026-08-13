@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import { useAuth } from "../context/AuthContext";
@@ -65,40 +66,34 @@ const Dashboard = () => {
           </button>
         </div>
 
-        {error && (
-          <div className="mb-4 p-3 rounded-xl bg-red-50 text-red-500 text-sm border border-red-100">{error}</div>
-        )}
-
         {loading ? (
-          <div className="text-center py-16 text-gray-400">Loading your notes...</div>
+        <div className="text-center py-16 text-gray-400">Loading your notes...</div>
+        ) : error ? (
+        <div className="text-center py-16">
+            <p className="text-gray-500 mb-3">{error}</p>
+            <button onClick={fetchNotes} className="px-4 py-2 bg-purple-500 text-white rounded-lg text-sm">Try again</button>
+        </div>
         ) : notes.length === 0 ? (
-          <div className="text-center py-16">
+        <div className="text-center py-16">
             <p className="text-5xl mb-3">🌸</p>
             <p className="text-gray-500">No notes yet — create your first one!</p>
-          </div>
-        ) : (
+        </div>
+        ) : ( 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {notes.map((note) => (
-              <div
-                key={note._id}
-                className="bg-white rounded-2xl shadow-sm hover:shadow-lg border border-purple-50 p-5 cursor-pointer transition group"
-                onClick={() => navigate(`/notes/${note._id}`)}
-              >
-                <h3 className="font-semibold text-gray-800 mb-2 truncate">{note.title}</h3>
-                <p className="text-sm text-gray-500 line-clamp-3 mb-3">{stripHtml(note.content) || "No content"}</p>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-400">{new Date(note.updatedAt).toLocaleDateString()}</span>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setDeleteId(note._id);
-                    }}
-                    className="text-xs text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition"
-                  >
+              <div key={note._id} className="bg-white rounded-2xl shadow-sm hover:shadow-lg border border-purple-50 p-5 transition group relative">
+                <Link to={`/notes/${note._id}`} className="block focus:outline-none focus:ring-2 focus:ring-purple-300 rounded-xl">
+                    <h3 className="font-semibold text-gray-800 mb-2 truncate">{note.title}</h3>
+                    <p className="text-sm text-gray-500 line-clamp-3 mb-3">{stripHtml(note.content) || "No content"}</p>
+                    <span className="text-xs text-gray-400">{new Date(note.updatedAt).toLocaleDateString()}</span>
+                </Link>
+                <button
+                    onClick={(e) => { e.stopPropagation(); setDeleteId(note._id); }}
+                    className="absolute top-4 right-4 text-xs text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 focus:opacity-100 transition"
+                >
                     Delete
-                  </button>
+                </button>
                 </div>
-              </div>
             ))}
           </div>
         )}
