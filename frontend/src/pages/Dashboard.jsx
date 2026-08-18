@@ -1,8 +1,17 @@
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import { useAuth } from "../context/AuthContext";
+
+const NOTE_DETAILS = {
+  note: { label: "Note", icon: "✦", color: "purple" },
+  checklist: { label: "Checklist", icon: "✓", color: "teal" },
+  todo: { label: "To-do", icon: "○", color: "orange" },
+  goal: { label: "Goal", icon: "↗", color: "navy" },
+};
+
+const stripHtml = (html = "") => html.replace(/<[^>]*>/g, "");
+const formatDate = (date) => new Intl.DateTimeFormat("en", { month: "short", day: "numeric" }).format(new Date(date));
 
 const Dashboard = () => {
   const [notes, setNotes] = useState([]);
@@ -12,109 +21,83 @@ const Dashboard = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchNotes();
-  }, []);
-
   const fetchNotes = async () => {
     setLoading(true);
     setError("");
     try {
-      const res = await api.get("/notes");
-      setNotes(res.data.data.notes);
-    } catch (err) {
+      const response = await api.get("/notes");
+      setNotes(response.data.data.notes);
+    } catch {
       setError("Could not load your notes. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    const loadNotes = setTimeout(() => { void fetchNotes(); }, 0);
+    return () => clearTimeout(loadNotes);
+  }, []);
+
   const handleDelete = async (id) => {
     try {
       await api.delete(`/notes/${id}`);
-      setNotes(notes.filter((n) => n._id !== id));
+      setNotes((currentNotes) => currentNotes.filter((note) => note._id !== id));
       setDeleteId(null);
-    } catch (err) {
+    } catch {
       setError("Could not delete note. Please try again.");
+      setDeleteId(null);
     }
   };
 
-  const stripHtml = (html) => html.replace(/<[^>]*>/g, "");
+  const name = user?.name?.split(" ")[0] || "there";
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50">
-      <header className="bg-white/70 backdrop-blur border-b border-purple-100 px-6 py-4 flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold text-gray-800">📝 My Notes</h1>
-          <p className="text-sm text-gray-500">Hi, {user?.name}</p>
+    <div className="dashboard-page">
+      <header className="dashboard-header">
+        <Link to="/dashboard" className="brand"><span className="brand-mark">✦</span> NoteNest</Link>
+        <div className="header-actions">
+          <span className="user-greeting">Hello, {name}</span>
+          <button className="avatar" type="button" aria-label="Log out" onClick={logout} title="Log out">{name.charAt(0).toUpperCase()}</button>
         </div>
-        <button onClick={logout} className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-red-500 transition">
-          Logout
-        </button>
       </header>
 
-      <main className="max-w-5xl mx-auto px-6 py-8">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold text-gray-700">
-            {notes.length} {notes.length === 1 ? "note" : "notes"}
-          </h2>
-          <button
-            onClick={() => navigate("/notes/new")}
-            className="px-5 py-2.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-medium hover:shadow-lg hover:shadow-purple-200 transition"
-          >
-            + New Note
-          </button>
-        </div>
-
-        {loading ? (
-        <div className="text-center py-16 text-gray-400">Loading your notes...</div>
-        ) : error ? (
-        <div className="text-center py-16">
-            <p className="text-gray-500 mb-3">{error}</p>
-            <button onClick={fetchNotes} className="px-4 py-2 bg-purple-500 text-white rounded-lg text-sm">Try again</button>
-        </div>
-        ) : notes.length === 0 ? (
-        <div className="text-center py-16">
-            <p className="text-5xl mb-3">🌸</p>
-            <p className="text-gray-500">No notes yet — create your first one!</p>
-        </div>
-        ) : ( 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {notes.map((note) => (
-              <div key={note._id} className="bg-white rounded-2xl shadow-sm hover:shadow-lg border border-purple-50 p-5 transition group relative">
-                <Link to={`/notes/${note._id}`} className="block focus:outline-none focus:ring-2 focus:ring-purple-300 rounded-xl">
-                    <h3 className="font-semibold text-gray-800 mb-2 truncate">{note.title}</h3>
-                    <p className="text-sm text-gray-500 line-clamp-3 mb-3">{stripHtml(note.content) || "No content"}</p>
-                    <span className="text-xs text-gray-400">{new Date(note.updatedAt).toLocaleDateString()}</span>
-                </Link>
-                <button
-                    onClick={(e) => { e.stopPropagation(); setDeleteId(note._id); }}
-                    className="absolute top-4 right-4 text-xs text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 focus:opacity-100 transition"
-                >
-                    Delete
-                </button>
-                </div>
-            ))}
+      <main className="dashboard-content">
+        <section className="dashboard-hero">
+          <div>
+            <span className="eyebrow">Your personal collection</span>
+            <h1>Ready to write<br />something <em>new?</em></h1>
+            <p>Keep your ideas, tasks, and goals together in one bright little space.</p>
           </div>
-        )}
+          <div className="hero-doodle" aria-hidden="true"><span>✎</span><i /><b /></div>
+        </section>
+
+        <section className="notes-toolbar" aria-label="Notes overview">
+          <div><h2>Your notes <span>{notes.length}</span></h2><p>Pin the things you want to keep close.</p></div>
+          <button type="button" className="primary-button new-note-button" onClick={() => navigate("/notes/new")}><span>+</span> New note</button>
+        </section>
+
+        {loading ? <div className="notes-message"><div className="loading-orbit" />Loading your notes…</div>
+          : error ? <div className="notes-message notes-error"><span>!</span><p>{error}</p><button type="button" onClick={fetchNotes}>Try again</button></div>
+            : notes.length === 0 ? <div className="empty-notes"><div>✦</div><h2>Your page is waiting.</h2><p>Start with a thought, a plan, or a tiny reminder for later.</p><button type="button" className="primary-button" onClick={() => navigate("/notes/new")}>Create your first note</button></div>
+              : <section className="notes-grid" aria-label="Your notes">
+                {notes.map((note) => {
+                  const details = NOTE_DETAILS[note.noteType] || NOTE_DETAILS.note;
+                  const color = note.color || details.color;
+                  return <article key={note._id} className={`note-card note-card-${color}`}>
+                    <Link to={`/notes/${note._id}`} className="note-card-link" aria-label={`Open ${note.title}`}>
+                      <div className="note-card-topline"><span className="note-type"><b>{details.icon}</b>{details.label}</span>{note.pinned && <span className="pin" title="Pinned">⌁</span>}</div>
+                      <h3>{note.title || "Untitled Note"}</h3>
+                      <p>{stripHtml(note.content) || "A blank page can be a lovely place to begin."}</p>
+                      <footer><span>Updated {formatDate(note.updatedAt)}</span><span className="card-arrow">↗</span></footer>
+                    </Link>
+                    <button type="button" className="delete-note" onClick={() => setDeleteId(note._id)} aria-label={`Delete ${note.title}`}>×</button>
+                  </article>;
+                })}
+              </section>}
       </main>
 
-      {deleteId && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center px-4 z-50">
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full">
-            <h3 className="font-semibold text-gray-800 mb-2">Delete this note?</h3>
-            <p className="text-sm text-gray-500 mb-5">This action cannot be undone.</p>
-            <div className="flex gap-3">
-              <button onClick={() => setDeleteId(null)} className="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-600 font-medium">
-                Cancel
-              </button>
-              <button onClick={() => handleDelete(deleteId)} className="flex-1 py-2.5 rounded-xl bg-red-500 text-white font-medium">
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {deleteId && <div className="modal-backdrop" role="presentation"><section className="delete-modal" role="dialog" aria-modal="true" aria-labelledby="delete-heading"><span className="modal-icon">×</span><h2 id="delete-heading">Delete this note?</h2><p>It will be removed from your collection permanently.</p><div className="modal-actions"><button type="button" className="secondary-button" onClick={() => setDeleteId(null)}>Keep it</button><button type="button" className="danger-button" onClick={() => handleDelete(deleteId)}>Delete note</button></div></section></div>}
     </div>
   );
 };

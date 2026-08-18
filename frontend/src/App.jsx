@@ -6,7 +6,7 @@ import Dashboard from "./pages/Dashboard";
 import { useAuth } from "./context/AuthContext";
 
 function App() {
-  const { user, loading, logout} = useAuth();
+  const { user, loading } = useAuth();
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
