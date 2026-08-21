@@ -25,6 +25,8 @@ const NoteEditor = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [initialContent, setInitialContent] = useState("");
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [colorManuallySelected, setColorManuallySelected] = useState(false);
 
   useEffect(() => {
     if (!isEditing) return undefined;
@@ -39,7 +41,10 @@ const NoteEditor = () => {
           setPinned(Boolean(note.pinned));
           setInitialContent(note.content || "");
         })
-        .catch(() => setError("This note could not be loaded. Please return to your dashboard."))
+        .catch(() => {
+          setLoadFailed(true);
+          setError("This note could not be loaded. Please return to your dashboard.");
+        })
         .finally(() => setLoading(false));
     }, 0);
 
@@ -48,38 +53,49 @@ const NoteEditor = () => {
 
   const selectType = (type) => {
     setNoteType(type.value);
-    setColor(type.color);
+
+    if (!colorManuallySelected) {
+      setColor(type.color);
+    }
 
     const isEmpty = !editorRef.current?.innerText.trim();
     if (!isEmpty) return;
 
     if (type.value === "checklist") {
-      editorRef.current.innerHTML =
-        '<div class="task-item"><input type="checkbox" /> <span>New task</span></div>';
+      editorRef.current?.insertAdjacentHTML(
+        "beforeend",
+        '<div class="task-item"><input type="checkbox" /> <span>New task</span></div>',
+      );
     }
+
     if (type.value === "todo") {
-      editorRef.current.innerHTML = '<ul class="dot-list"><li>New task</li></ul>';
+      editorRef.current?.insertAdjacentHTML(
+        "beforeend",
+        '<ul class="dot-list"><li>New task</li></ul>',
+      );
     }
+
     if (type.value === "goal") {
-      editorRef.current.innerHTML =
-        '<div class="goal-frequency"><label>Track this goal</label>' +
-        '<select><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select></div>' +
-        '<div class="task-item"><input type="checkbox" /> <span>Milestone</span></div>';
+      editorRef.current?.insertAdjacentHTML(
+        "beforeend",
+        '<div class="goal-frequency"><label>Track this goal</label><select><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select></div><div class="task-item"><input type="checkbox" /> <span>Milestone</span></div>',
+      );
     }
   };
-const togglePin = async () => {
-  if (!isEditing) return; // can't pin a note that doesn't exist in the DB yet
 
-  const nextPinned = !pinned;
-  setPinned(nextPinned); // instant visual feedback
+  const togglePin = async () => {
+    if (!isEditing) return; // can't pin a note that doesn't exist in the DB yet
 
-  try {
-    await api.put(`/notes/${id}`, { pinned: nextPinned });
-  } catch {
-    setPinned(!nextPinned); // roll back if the request fails
-    setError("Could not update the pin. Please try again.");
-  }
-};
+    const nextPinned = !pinned;
+    setPinned(nextPinned); // instant visual feedback
+
+    try {
+      await api.put(`/notes/${id}`, { pinned: nextPinned });
+    } catch {
+      setPinned(!nextPinned); // roll back if the request fails
+      setError("Could not update the pin. Please try again.");
+    }
+  };
 
   const applyFormat = (command, value) => {
     editorRef.current?.focus();
@@ -132,6 +148,7 @@ const togglePin = async () => {
 
 
   if (loading) return <div className="editor-loading">Opening your note…</div>;
+  if (loadFailed) return <div className="editor-error">Failed to load the note. Please try again.</div>;
 
   return (
     <main className="editor-page">
@@ -139,7 +156,7 @@ const togglePin = async () => {
         <button type="button" className="back-button" onClick={() => navigate("/dashboard")}>← <span>All notes</span></button>
         <div className="editor-actions">
           <button type="button" className="cancel-button" onClick={() => navigate("/dashboard")}>Cancel</button>
-          <button type="button" className="primary-button" onClick={saveNote} disabled={saving}>{saving ? "Saving…" : "Save note"}</button>
+          <button type="button" className="primary-button" onClick={saveNote} disabled={saving || loadFailed}>{saving ? "Saving…" : "Save note"}</button>
         </div>
       </header>
 
