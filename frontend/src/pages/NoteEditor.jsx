@@ -49,7 +49,37 @@ const NoteEditor = () => {
   const selectType = (type) => {
     setNoteType(type.value);
     setColor(type.color);
+
+    const isEmpty = !editorRef.current?.innerText.trim();
+    if (!isEmpty) return;
+
+    if (type.value === "checklist") {
+      editorRef.current.innerHTML =
+        '<div class="task-item"><input type="checkbox" /> <span>New task</span></div>';
+    }
+    if (type.value === "todo") {
+      editorRef.current.innerHTML = '<ul class="dot-list"><li>New task</li></ul>';
+    }
+    if (type.value === "goal") {
+      editorRef.current.innerHTML =
+        '<div class="goal-frequency"><label>Track this goal</label>' +
+        '<select><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select></div>' +
+        '<div class="task-item"><input type="checkbox" /> <span>Milestone</span></div>';
+    }
   };
+const togglePin = async () => {
+  if (!isEditing) return; // can't pin a note that doesn't exist in the DB yet
+
+  const nextPinned = !pinned;
+  setPinned(nextPinned); // instant visual feedback
+
+  try {
+    await api.put(`/notes/${id}`, { pinned: nextPinned });
+  } catch {
+    setPinned(!nextPinned); // roll back if the request fails
+    setError("Could not update the pin. Please try again.");
+  }
+};
 
   const applyFormat = (command, value) => {
     editorRef.current?.focus();
@@ -58,6 +88,10 @@ const NoteEditor = () => {
 
   const addTask = () => {
     editorRef.current?.focus();
+    if (noteType === "todo") {
+      document.execCommand("insertHTML", false, '<ul class="dot-list"><li>New task</li></ul>');
+      return;
+    }
     document.execCommand(
       "insertHTML",
       false,
@@ -112,7 +146,14 @@ const NoteEditor = () => {
       <section className={`editor-shell editor-${color}`}>
         <div className="editor-topline">
           <span className="eyebrow">{isEditing ? "Keep shaping your thought" : "A fresh page for your thoughts"}</span>
-          <button type="button" className={`pin-toggle ${pinned ? "is-pinned" : ""}`} onClick={() => setPinned((value) => !value)} aria-pressed={pinned}>
+          <button
+            type="button"
+            className={`pin-toggle ${pinned ? "is-pinned" : ""}`}
+            onClick={togglePin}
+            aria-pressed={pinned}
+            disabled={!isEditing}
+            title={!isEditing ? "Save your note first, then you can pin it" : ""}
+          >
             <span>⌁</span> {pinned ? "Pinned" : "Pin note"}
           </button>
         </div>
@@ -129,7 +170,8 @@ const NoteEditor = () => {
           <button type="button" onClick={() => applyFormat("formatBlock", "h3")} aria-label="Heading">H</button>
           <button type="button" onClick={() => applyFormat("insertUnorderedList")} aria-label="Bulleted list">☷</button>
           <button type="button" onClick={() => applyFormat("insertOrderedList")} aria-label="Numbered list">≣</button>
-          {(noteType === "checklist" || noteType === "todo") && <button type="button" onClick={addTask} aria-label="Add checkbox">☐</button>}
+          {noteType === "checklist" && <button type="button" onClick={addTask} aria-label="Add checkbox">☐</button>}
+          {noteType === "todo" && <button type="button" onClick={addTask} aria-label="Add task dot">•</button>}
         </div>
 
         <div ref={editorRef} className="rich-editor" contentEditable suppressContentEditableWarning data-placeholder="Start writing here…" role="textbox" aria-multiline="true" onClick={persistCheckboxState} dangerouslySetInnerHTML={{ __html: initialContent }} />

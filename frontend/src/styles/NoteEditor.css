@@ -14,7 +14,7 @@
 .editor-topline{align-items:center;display:flex;justify-content:space-between}
 .pin-toggle{align-items:center;background:#ffffff9c;border:0;border-radius:20px;color:#5a5366;display:flex;font-size:.78rem;font-weight:800;gap:5px;padding:8px 11px}
 .pin-toggle span{font-size:1.15rem;transform:rotate(-30deg)}
-.pin-toggle.is-pinned{background:#fff;color:#6f28ac}
+.pin-toggle.is-pinned{background:#fff;color:#6f28ac; box-shadow:0 0 0 3px #6f28ac22;}
 .note-title-input{background:transparent;border:0;border-bottom:1px solid #ffffffa6;color:#202638;font-size:clamp(2rem,5vw,3.3rem);font-weight:800;letter-spacing:-.07em;margin:28px 0 17px;outline:0;padding:4px 0 15px;width:100%}
 .note-title-input::placeholder{color:#74717d99}
 .type-picker{display:grid;gap:9px;grid-template-columns:repeat(4,1fr);margin-bottom:28px}

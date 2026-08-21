@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import { useAuth } from "../context/AuthContext";
@@ -19,8 +19,21 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [deleteId, setDeleteId] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!menuOpen) return undefined;
+    const closeMenu = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", closeMenu);
+    return () => document.removeEventListener("mousedown", closeMenu);
+  }, [menuOpen]);
 
   const fetchNotes = async () => {
     setLoading(true);
@@ -67,9 +80,26 @@ const Dashboard = () => {
       <header className="dashboard-header">
         <Link to="/dashboard" className="brand"><span className="brand-mark">✦</span> NoteNest</Link>
         <div className="header-actions">
-          <span className="user-greeting">Hello, {name}</span>
-          <span className="avatar" aria-hidden="true">{name.charAt(0).toUpperCase()}</span>
-          <button className="logout-button" type="button" onClick={logout}>Log out <span>→</span></button>
+          <div className="user-menu" ref={menuRef}>
+            <button
+              type="button"
+              className="avatar"
+              onClick={(event) => { event.stopPropagation(); setMenuOpen((value) => !value); }}
+              aria-haspopup="true"
+              aria-expanded={menuOpen}
+              aria-label="Account menu"
+            >
+              {name.charAt(0).toUpperCase()}
+            </button>
+            {menuOpen && (
+              <div className="user-dropdown" role="menu">
+                <span className="dropdown-greeting">Hello, {name}</span>
+                <button type="button" className="dropdown-logout" role="menuitem" onClick={logout}>
+                  Log out <span>→</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
@@ -92,7 +122,7 @@ const Dashboard = () => {
           : error ? <div className="notes-message notes-error"><span>!</span><p>{error}</p><button type="button" onClick={fetchNotes}>Try again</button></div>
             : notes.length === 0 ? <div className="empty-notes"><div>✦</div><h2>Your page is waiting.</h2><p>Start with a thought, a plan, or a tiny reminder for later.</p><button type="button" className="primary-button" onClick={() => navigate("/notes/new")}>Create your first note</button></div>
               : <section className="notes-grid" aria-label="Your notes">
-                {notes.map((note) => {
+                {[...notes].sort((a, b) => (b.pinned === a.pinned ? 0 : b.pinned ? 1 : -1)).map((note) => {
                   const details = NOTE_DETAILS[note.noteType] || NOTE_DETAILS.note;
                   const color = note.color || details.color;
                   return <article key={note._id} className={`note-card note-card-${color}`}>
