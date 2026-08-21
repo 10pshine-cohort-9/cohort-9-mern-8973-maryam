@@ -1,0 +1,10 @@
+
+
+.logout-button{background:#fff;border:1px solid #dfd7cf;border-radius:10px;color:#5d6270;font-size:.78rem;font-weight:800;padding:8px 11px}
+.logout-button:hover{border-color:#d6b5ed;color:#7528b9}
+.logout-button span{font-size:1rem;margin-left:3px}
+.pin-card{align-items:center;background:#ffffffa8;border:0;border-radius:12px;color:#5f5968;display:flex;font-size:.7rem;font-weight:800;gap:3px;padding:6px 8px;position:absolute;right:15px;top:15px}
+.pin-card span{font-size:1rem;line-height:.8;transform:rotate(-30deg)}
+.pin-card.is-pinned{background:#fff;color:#7629b6}
+.delete-note{right:15px!important;top:53px!important}@media(max-width:760px){.avatar{display:none}
+.logout-button{font-size:.74rem}.pin-card{opacity:1}.delete-note{opacity:1}}

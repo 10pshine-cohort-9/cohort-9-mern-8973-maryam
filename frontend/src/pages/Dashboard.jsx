@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import { useAuth } from "../context/AuthContext";
+import "../styles/DashboardControls.css";
 
 const NOTE_DETAILS = {
   note: { label: "Note", icon: "✦", color: "purple" },
@@ -50,6 +51,15 @@ const Dashboard = () => {
     }
   };
 
+  const togglePin = async (note) => {
+    try {
+      const response = await api.put(`/notes/${note._id}`, { pinned: !note.pinned });
+      setNotes((currentNotes) => currentNotes.map((item) => (item._id === note._id ? response.data.data.note : item)));
+    } catch {
+      setError("Could not update the pin. Please try again.");
+    }
+  };
+
   const name = user?.name?.split(" ")[0] || "there";
 
   return (
@@ -58,7 +68,8 @@ const Dashboard = () => {
         <Link to="/dashboard" className="brand"><span className="brand-mark">✦</span> NoteNest</Link>
         <div className="header-actions">
           <span className="user-greeting">Hello, {name}</span>
-          <button className="avatar" type="button" aria-label="Log out" onClick={logout} title="Log out">{name.charAt(0).toUpperCase()}</button>
+          <span className="avatar" aria-hidden="true">{name.charAt(0).toUpperCase()}</span>
+          <button className="logout-button" type="button" onClick={logout}>Log out <span>→</span></button>
         </div>
       </header>
 
@@ -91,6 +102,7 @@ const Dashboard = () => {
                       <p>{stripHtml(note.content) || "A blank page can be a lovely place to begin."}</p>
                       <footer><span>Updated {formatDate(note.updatedAt)}</span><span className="card-arrow">↗</span></footer>
                     </Link>
+                    <button type="button" className={`pin-card ${note.pinned ? "is-pinned" : ""}`} onClick={() => togglePin(note)} aria-pressed={Boolean(note.pinned)}>{note.pinned ? "Pinned" : "Pin"} <span>⌁</span></button>
                     <button type="button" className="delete-note" onClick={() => setDeleteId(note._id)} aria-label={`Delete ${note.title}`}>×</button>
                   </article>;
                 })}
