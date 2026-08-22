@@ -5,7 +5,12 @@
   --purple: #8d2de2;
   --line: #e9e3dc;
 }
-
+.app-loading {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 button,
 input {
   font: inherit;

@@ -1,3 +1,4 @@
+
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../api/axios";
@@ -13,6 +14,31 @@ const NOTE_DETAILS = {
 
 const stripHtml = (html = "") => html.replace(/<[^>]*>/g, "");
 const formatDate = (date) => new Intl.DateTimeFormat("en", { month: "short", day: "numeric" }).format(new Date(date));
+
+const getPreviewItems = (html = "", noteType) => {
+  if (!html || (noteType !== "checklist" && noteType !== "goal" && noteType !== "todo")) return null;
+  const doc = new DOMParser().parseFromString(html, "text/html");
+
+  if (noteType === "todo") {
+    const items = Array.from(doc.querySelectorAll(".dot-list li")).slice(0, 3).map((li) => ({
+      text: li.querySelector("span")?.textContent?.trim() || li.textContent.trim(),
+    }));
+    if (items.length) return { kind: "dot", items };
+    const plainText = stripHtml(html).trim();
+    return plainText ? { kind: "dot", items: [{ text: plainText }] } : null;
+  }
+
+  const items = Array.from(doc.querySelectorAll(".task-item")).slice(0, 3).map((item) => ({
+    text: item.querySelector("span")?.textContent?.trim() || "",
+    checked: Boolean(item.querySelector("input")?.hasAttribute("checked")),
+  }));
+  if (items.length) return { kind: "task", items };
+
+  const plainText = stripHtml(html).trim();
+  return plainText ? { kind: "task", items: [{ text: plainText, checked: false }] } : null;
+};
+
+const goalLabel = (period) => (period === "monthly" ? "Monthly Goal" : "Weekly Goal");
 
 const Dashboard = () => {
   const [notes, setNotes] = useState([]);
@@ -80,27 +106,36 @@ const Dashboard = () => {
       <header className="dashboard-header">
         <Link to="/dashboard" className="brand"><span className="brand-mark">✦</span> NoteNest</Link>
         <div className="header-actions">
-          <div className="user-menu" ref={menuRef}>
-            <button
-              type="button"
-              className="avatar"
-              onClick={(event) => { event.stopPropagation(); setMenuOpen((value) => !value); }}
-              aria-haspopup="true"
-              aria-expanded={menuOpen}
-              aria-label="Account menu"
-            >
-              {name.charAt(0).toUpperCase()}
-            </button>
-            {menuOpen && (
-              <div className="user-dropdown" role="menu">
-                <span className="dropdown-greeting">Hello, {name}</span>
-                <button type="button" className="dropdown-logout" role="menuitem" onClick={logout}>
-                  Log out <span>→</span>
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
+  <span className="user-greeting">Hello, {name}</span>
+  <div className="user-menu" ref={menuRef}>
+    <button 
+      type="button" 
+      className="avatar" 
+      onClick={(event) => { 
+        event.stopPropagation(); 
+        setMenuOpen((value) => !value); 
+      }} 
+      aria-haspopup="true" 
+      aria-expanded={menuOpen} 
+      aria-label="Account menu"
+    >
+      {name.charAt(0).toUpperCase()}
+    </button>
+    {menuOpen && (
+      <div className="user-dropdown" role="menu">
+        <button 
+          type="button" 
+          className="dropdown-logout" 
+          role="menuitem" 
+          onClick={logout}
+        >
+          Log out <span>→</span>
+        </button>
+      </div>
+    )}
+  </div>
+</div>
+
       </header>
 
       <main className="dashboard-content">
@@ -125,11 +160,24 @@ const Dashboard = () => {
                 {[...notes].sort((a, b) => (b.pinned === a.pinned ? 0 : b.pinned ? 1 : -1)).map((note) => {
                   const details = NOTE_DETAILS[note.noteType] || NOTE_DETAILS.note;
                   const color = note.color || details.color;
+                  const label = note.noteType === "goal" ? goalLabel(note.goalPeriod) : details.label;
+                  const preview = getPreviewItems(note.content, note.noteType);
                   return <article key={note._id} className={`note-card note-card-${color}`}>
                     <Link to={`/notes/${note._id}`} className="note-card-link" aria-label={`Open ${note.title}`}>
-                      <div className="note-card-topline"><span className="note-type"><b>{details.icon}</b>{details.label}</span>{note.pinned && <span className="pin" title="Pinned">⌁</span>}</div>
+                      <div className="note-card-topline"><span className="note-type"><b>{details.icon}</b>{label}</span></div>
                       <h3>{note.title || "Untitled Note"}</h3>
-                      <p>{stripHtml(note.content) || "A blank page can be a lovely place to begin."}</p>
+                      {preview ? (
+                        <ul className="note-preview-list">
+                          {preview.items.map((item, index) => (
+                            <li key={index} className={item.checked ? "is-done" : ""}>
+                              <span className={preview.kind === "dot" ? "preview-dot" : "preview-check"} />
+                              {item.text || "Untitled item"}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p>{stripHtml(note.content) || "A blank page can be a lovely place to begin."}</p>
+                      )}
                       <footer><span>Updated {formatDate(note.updatedAt)}</span><span className="card-arrow">↗</span></footer>
                     </Link>
                     <button type="button" className={`pin-card ${note.pinned ? "is-pinned" : ""}`} onClick={() => togglePin(note)} aria-pressed={Boolean(note.pinned)}>{note.pinned ? "Pinned" : "Pin"} <span>⌁</span></button>
