@@ -26,48 +26,63 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-orange-50 via-pink-50 to-purple-100 px-4">
-      <div className="w-full max-w-md bg-white rounded-3xl shadow-xl shadow-pink-100 p-8 border border-pink-50">
-        <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-pink-400 to-orange-400 flex items-center justify-center text-2xl mb-5">
-          ✨
+    <main className="auth-page auth-page-signup">
+      <section className="auth-showcase" aria-label="NoteNest introduction">
+        <div className="brand"><span className="brand-mark">✦</span> NoteNest</div>
+        <div className="auth-copy">
+          <span className="eyebrow">A home for every idea</span>
+          <h1>Make room<br />for what<br /><em>matters.</em></h1>
+          <p>Turn loose thoughts into a colourful collection you will actually want to revisit.</p>
         </div>
-        <h1 className="text-2xl font-bold text-gray-800 mb-1">Create your account</h1>
-        <p className="text-gray-500 mb-6">Start organizing your notes</p>
+        <div className="auth-note-preview auth-note-preview-orange">
+          <span>Small wins</span>
+          <strong>Start with one note. The rest can follow.</strong>
+          <div className="preview-dots"><i /><i /><i /></div>
+        </div>
+      </section>
+
+      <section className="auth-panel">
+        <div className="auth-form-wrap">
+          <div className="brand brand-mobile"><span className="brand-mark">✦</span> NoteNest</div>
+          <span className="eyebrow">Start your collection</span>
+          <h2>Create your cosy corner.</h2>
+          <p className="auth-subtitle">A few details, then your notes are ready for you.</p>
 
         {error && (
-          <div className="mb-4 p-3 rounded-xl bg-red-50 text-red-500 text-sm border border-red-100">
+          <div className="form-error" role="alert">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1.5">Name</label>
+        <form onSubmit={handleSubmit} className="auth-form">
+          <div className="field-group">
+            <label htmlFor="name">Your name</label>
             <input
+              id="name"
               type="text"
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-transparent bg-gray-50 transition"
+              className="auth-input"
               placeholder="Your name"
             />
           </div>
 
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-600 mb-1.5">Email</label>
+          <div className="field-group">
+            <label htmlFor="email">Email address</label>
             <input
               id="email"
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-transparent bg-gray-50 transition"
+              className="auth-input"
               placeholder="you@example.com"
             />
           </div>
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-600 mb-1.5">Password</label>
+          <div className="field-group">
+            <label htmlFor="password">Password</label>
             <input
               id="password"
               type="password"
@@ -75,7 +90,7 @@ const Signup = () => {
               minLength={6}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-transparent bg-gray-50 transition"
+              className="auth-input"
               placeholder="At least 6 characters"
             />
           </div>
@@ -83,20 +98,21 @@ const Signup = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-linear-to-r from-pink-500 to-orange-400 text-white py-3 rounded-xl font-medium hover:shadow-lg hover:shadow-pink-200 transition disabled:opacity-50"
+            className="primary-button auth-submit"
           >
             {loading ? "Creating account..." : "Sign Up"}
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-gray-500">
+        <p className="auth-switch">
           Already have an account?{" "}
-          <Link to="/login" className="text-pink-600 font-medium hover:underline">
+          <Link to="/login">
             Log in
           </Link>
         </p>
-      </div>
-    </div>
+        </div>
+      </section>
+    </main>
   );
 };
 

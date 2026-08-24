@@ -25,43 +25,57 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-purple-100 via-pink-50 to-orange-50 px-4">
-      <div className="w-full max-w-md bg-white rounded-3xl shadow-xl shadow-purple-100 p-8 border border-purple-50">
-        <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-purple-400 to-pink-400 flex items-center justify-center text-2xl mb-5">
-          📝
+    <main className="auth-page">
+      <section className="auth-showcase" aria-label="NoteNest introduction">
+        <div className="brand"><span className="brand-mark">✦</span> NoteNest</div>
+        <div className="auth-copy">
+          <span className="eyebrow">Your thoughts, beautifully kept</span>
+          <h1>Think it.<br />Note it.<br /><em>Keep it.</em></h1>
+          <p>A calm, colourful space for every plan, spark, and small reminder.</p>
         </div>
-        <h1 className="text-2xl font-bold text-gray-800 mb-1">Welcome back!</h1>
-        <p className="text-gray-500 mb-6">Log in to your Notes account</p>
+        <div className="auth-note-preview">
+          <span>Today’s thought</span>
+          <strong>Little steps still move you forward.</strong>
+          <div className="preview-dots"><i /><i /><i /></div>
+        </div>
+      </section>
+
+      <section className="auth-panel">
+        <div className="auth-form-wrap">
+          <div className="brand brand-mobile"><span className="brand-mark">✦</span> NoteNest</div>
+          <span className="eyebrow">Welcome back</span>
+          <h2>Ready to pick up where you left off?</h2>
+          <p className="auth-subtitle">Log in to see your personal collection of notes.</p>
 
         {error && (
-          <div className="mb-4 p-3 rounded-xl bg-red-50 text-red-500 text-sm border border-red-100">
+          <div className="form-error" role="alert">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="email"className="block text-sm font-medium text-gray-600 mb-1.5">Email</label>
+        <form onSubmit={handleSubmit} className="auth-form">
+          <div className="field-group">
+            <label htmlFor="email">Email address</label>
             <input
               id="email"
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-300 focus:border-transparent bg-gray-50 transition"
+              className="auth-input"
               placeholder="you@example.com"
             />
           </div>
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-600 mb-1.5">Password</label>
+          <div className="field-group">
+            <label htmlFor="password">Password</label>
             <input
               id="password"
               type="password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-300 focus:border-transparent bg-gray-50 transition"
+              className="auth-input"
               placeholder="••••••••"
             />
           </div>
@@ -69,20 +83,21 @@ const Login = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-linear-to-r from-purple-500 to-pink-500 text-white py-3 rounded-xl font-medium hover:shadow-lg hover:shadow-purple-200 transition disabled:opacity-50"
+            className="primary-button auth-submit"
           >
             {loading ? "Logging in..." : "Log In"}
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-gray-500">
+        <p className="auth-switch">
           Don't have an account?{" "}
-          <Link to="/signup" className="text-purple-600 font-medium hover:underline">
+          <Link to="/signup">
             Sign up
           </Link>
         </p>
-      </div>
-    </div>
+        </div>
+      </section>
+    </main>
   );
 };
 
