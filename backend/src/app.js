@@ -15,7 +15,19 @@ const app = express();
 // Middlewares
 app.use(cors());
 app.use(express.json());
-app.use(pinoHttp({ logger }));
+app.use(
+  pinoHttp({
+    logger,
+    serializers: {
+      req(req) {
+        return { method: req.method, url: req.url };
+      },
+      res(res) {
+        return { statusCode: res.statusCode };
+      },
+    },
+  })
+);
 
 //Routes
 app.use("/api/health", healthRoutes);

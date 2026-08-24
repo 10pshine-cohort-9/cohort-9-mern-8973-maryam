@@ -41,6 +41,12 @@ const noteSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    goalPeriod: { 
+      type: String,
+       enum: ["weekly", "monthly"],
+       default: "weekly"
+       },
+
   },
   { timestamps: true }
 );

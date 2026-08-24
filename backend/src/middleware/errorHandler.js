@@ -8,6 +8,12 @@ module.exports = (err, req, res, next) => {
       message: messages.join(", "),
     });
   }
+  if (err.name === "CastError") {
+  return res.status(400).json({
+    success: false,
+    message: "Invalid ID format",
+  });
+}
   const statusCode = err.status || 500;
 
   res.status(statusCode).json({

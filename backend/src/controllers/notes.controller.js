@@ -8,7 +8,7 @@ const normaliseTitle = (title) =>
 
 const createNote = async (req, res, next) => {
   try {
-    const { title, content, noteType, color, pinned } = req.body || {};
+    const { title, content, noteType, color, pinned, goalPeriod } = req.body || {};
 
     const resolvedType = noteType ?? "note";
     const resolvedColor = color ?? DEFAULT_COLORS_BY_TYPE[resolvedType] ?? "purple";
@@ -19,6 +19,7 @@ const createNote = async (req, res, next) => {
       noteType: resolvedType,
       color: resolvedColor,
       pinned,
+      goalPeriod,
       user: req.user._id,
     });
 
@@ -68,7 +69,7 @@ const updateNote = async (req, res, next) => {
       return res.status(400).json({ success: false, message: "Invalid note ID" });
     }
 
-    const { title, content, noteType, color, pinned } = req.body || {};
+    const { title, content, noteType, color, pinned, goalPeriod } = req.body || {};
     const note = await Note.findOne({ _id: req.params.id, user: req.user._id });
 
     if (!note) {
@@ -88,6 +89,7 @@ const updateNote = async (req, res, next) => {
     if (noteType !== undefined) note.noteType = resolvedType;
     if (color !== undefined || isTypeChanging) note.color = resolvedColor;
     if (pinned !== undefined) note.pinned = pinned;
+    if (goalPeriod !== undefined) note.goalPeriod = goalPeriod;
     await note.save();
 
     logger.info(`Note updated: ${note._id} by user ${req.user._id}`);
