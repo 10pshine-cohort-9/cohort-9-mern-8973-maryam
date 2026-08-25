@@ -68,7 +68,6 @@ const NoteEditor = () => {
   const [loadFailed, setLoadFailed] = useState(false);
   const [colorManuallySelected, setColorManuallySelected] = useState(false);
   const [goalPeriod, setGoalPeriod] = useState("weekly");
-  const [activeFormats, setActiveFormats] = useState({ bold: false, italic: false });
   const [items, setItems] = useState([]);
   const [pendingFocusId, setPendingFocusId] = useState(null);
 
@@ -103,19 +102,19 @@ const NoteEditor = () => {
     return () => clearTimeout(loadNote);
   }, [id, isEditing]);
 
-  useEffect(() => {
-    const updateFormats = () => {
-      if (!editorRef.current) return;
-      const selection = window.getSelection();
-      if (!selection || !selection.anchorNode || !editorRef.current.contains(selection.anchorNode)) return;
-      setActiveFormats({
-        bold: document.queryCommandState("bold"),
-        italic: document.queryCommandState("italic"),
-      });
-    };
-    document.addEventListener("selectionchange", updateFormats);
-    return () => document.removeEventListener("selectionchange", updateFormats);
-  }, []);
+  // useEffect(() => {
+  //   const updateFormats = () => {
+  //     if (!editorRef.current) return;
+  //     const selection = window.getSelection();
+  //     if (!selection || !selection.anchorNode || !editorRef.current.contains(selection.anchorNode)) return;
+  //     setActiveFormats({
+  //       bold: document.queryCommandState("bold"),
+  //       italic: document.queryCommandState("italic"),
+  //     });
+  //   };
+  //   document.addEventListener("selectionchange", updateFormats);
+  //   return () => document.removeEventListener("selectionchange", updateFormats);
+  // }, []);
 
   useEffect(() => {
     if (pendingFocusId && itemRefs.current[pendingFocusId]) {
@@ -261,7 +260,7 @@ const NoteEditor = () => {
           <span className="goal-title-badge">{goalPeriod === "monthly" ? "Monthly Goal" : "Weekly Goal"}</span>
         )}
 
-        <input className="note-title-input" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Give your note a title" aria-label="Note title" />
+        <input id="note-title" name="title" className="note-title-input" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Give your note a title" aria-label="Note title" />
 
         <div className="type-picker" aria-label="Note type">
           {NOTE_TYPES.map((type) => <button key={type.value} type="button" className={noteType === type.value ? "type-active" : ""} onClick={() => selectType(type)}><b>{type.icon}</b><span>{type.label}<small>{type.description}</small></span></button>)}
@@ -276,8 +275,8 @@ const NoteEditor = () => {
 
         {!isItemType && (
           <div className="editor-toolbar" role="toolbar" aria-label="Text formatting">
-            <button type="button" className={activeFormats.bold ? "toolbar-active" : ""} onClick={() => applyFormat("bold")} aria-label="Bold" aria-pressed={activeFormats.bold}><b>B</b></button>
-            <button type="button" className={activeFormats.italic ? "toolbar-active" : ""} onClick={() => applyFormat("italic")} aria-label="Italic" aria-pressed={activeFormats.italic}><i>I</i></button>
+            <button type="button" onClick={() => applyFormat("bold")} aria-label="Bold"><b>B</b></button>
+            <button type="button" onClick={() => applyFormat("italic")} aria-label="Italic"><i>I</i></button>
             <button type="button" onClick={() => applyFormat("formatBlock", "h3")} aria-label="Heading">H</button>
             <button type="button" onClick={() => applyFormat("insertUnorderedList")} aria-label="Bulleted list">☷</button>
             <button type="button" onClick={() => applyFormat("insertOrderedList")} aria-label="Numbered list">≣</button>
@@ -300,6 +299,8 @@ const NoteEditor = () => {
                 )}
                 <input
                   type="text"
+                  id={`item-${item.id}`}
+                  name={`item-${item.id}`}
                   className={`item-text ${item.checked ? "is-done" : ""}`}
                   value={item.text}
                   placeholder={noteType === "goal" ? "Milestone" : "Task"}
