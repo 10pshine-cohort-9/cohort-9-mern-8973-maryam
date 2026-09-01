@@ -13,7 +13,7 @@ const signup = async (req, res, next) => {
       });
     }
 
-    const existingUser = await User.findOne({ email });
+    const existingUser = User.findOne({ email });
     if (existingUser) {
       return res.status(409).json({
         success: false,
@@ -21,7 +21,7 @@ const signup = async (req, res, next) => {
       });
     }
 
-    const user = await User.create({ name, email, password });
+    const user = User.create({ name, email, password });
 
     const token = generateToken(user._id);
 
@@ -61,7 +61,7 @@ const login = async (req, res, next) => {
       });
     }
 
-    const user = await User.findOne({ email });
+    const user = User.findOne({ email });
     if (!user) {
       return res.status(401).json({
         success: false,
@@ -69,7 +69,7 @@ const login = async (req, res, next) => {
       });
     }
 
-    const isMatch = await user.comparePassword(password);
+    const isMatch = user.comparePassword(password);
     if (!isMatch) {
       return res.status(401).json({
         success: false,
