@@ -71,6 +71,8 @@ const NoteEditor = () => {
   const [items, setItems] = useState([]);
   const [pendingFocusId, setPendingFocusId] = useState(null);
 
+  const isItemType = ITEM_TYPES.includes(noteType);
+  
   useEffect(() => {
     if (!isEditing) return undefined;
 
@@ -221,7 +223,6 @@ const NoteEditor = () => {
   if (loading) return <div className="editor-loading">Opening your note…</div>;
   if (loadFailed) return <div className="editor-error">Failed to load the note. Please try again.</div>;
 
-  const isItemType = ITEM_TYPES.includes(noteType);
 
   return (
     <main className="editor-page">

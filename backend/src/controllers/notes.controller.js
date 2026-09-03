@@ -37,7 +37,7 @@ const createNote = async (req, res, next) => {
 
 const getNotes = async (req, res, next) => {
   try {
-    const notes = Note.find({ user: req.user._id }).sort({
+    const notes = await Note.find({ user: req.user._id }).sort({
       pinned: -1,
       createdAt: -1,
     });
@@ -53,7 +53,7 @@ const getNoteById = async (req, res, next) => {
       return res.status(400).json({ success: false, message: "Invalid note ID" });
     }
 
-    const note =  Note.findOne({ _id: req.params.id, user: req.user._id });
+    const note = await Note.findOne({ _id: req.params.id, user: req.user._id });
     if (!note) {
       return res.status(404).json({ success: false, message: "Note not found" });
     }
@@ -70,7 +70,7 @@ const updateNote = async (req, res, next) => {
     }
 
     const { title, content, noteType, color, pinned, goalPeriod } = req.body || {};
-    const note = Note.findOne({ _id: req.params.id, user: req.user._id });
+    const note = await Note.findOne({ _id: req.params.id, user: req.user._id });
 
     if (!note) {
       return res.status(404).json({ success: false, message: "Note not found" });
@@ -110,7 +110,7 @@ const deleteNote = async (req, res, next) => {
       return res.status(400).json({ success: false, message: "Invalid note ID" });
     }
 
-    const note = await Note.findOneAndDelete({ _id: req.params.id, user: req.user._id });
+    const note = Note.findOneAndDelete({ _id: req.params.id, user: req.user._id });
     if (!note) {
       return res.status(404).json({ success: false, message: "Note not found" });
     }
