@@ -102,19 +102,6 @@ const NoteEditor = () => {
     return () => clearTimeout(loadNote);
   }, [id, isEditing]);
 
-  // useEffect(() => {
-  //   const updateFormats = () => {
-  //     if (!editorRef.current) return;
-  //     const selection = window.getSelection();
-  //     if (!selection || !selection.anchorNode || !editorRef.current.contains(selection.anchorNode)) return;
-  //     setActiveFormats({
-  //       bold: document.queryCommandState("bold"),
-  //       italic: document.queryCommandState("italic"),
-  //     });
-  //   };
-  //   document.addEventListener("selectionchange", updateFormats);
-  //   return () => document.removeEventListener("selectionchange", updateFormats);
-  // }, []);
 
   useEffect(() => {
     if (pendingFocusId && itemRefs.current[pendingFocusId]) {
@@ -123,6 +110,11 @@ const NoteEditor = () => {
     }
   }, [items, pendingFocusId]);
 
+  useEffect(() => {
+  if (!isItemType && editorRef.current) {
+    editorRef.current.innerHTML = initialContent;
+  }
+}, [initialContent, isItemType]);
 
   const selectType = (type) => {
     setNoteType(type.value);
@@ -323,7 +315,7 @@ const NoteEditor = () => {
             data-placeholder="Start writing here…"
             role="textbox"
             aria-multiline="true"
-            dangerouslySetInnerHTML={{ __html: initialContent }}
+            
           />
         )}
 

@@ -23,7 +23,7 @@ const protect = async (req, res, next) => {
   }
 
   try {
-    const user = await User.findById(decoded.id).select("-password");
+    const user = User.findById(decoded.id).select("-password");
     if (!user) {
       return res.status(401).json({
         success: false,
